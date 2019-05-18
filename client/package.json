@@ -1,0 +1,13 @@
+{
+  "scripts": {
+    "build": "next build",
+    "prod": "next start",
+    "start:prod": "npm run build && npm run prod",
+    "start:dev": "next"
+  },
+  "dependencies": {
+    "next": "^8.1.0",
+    "react": "^16.8.0",
+    "react-dom": "^16.8.0"
+  }
+}

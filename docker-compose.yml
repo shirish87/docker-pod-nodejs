@@ -1,0 +1,22 @@
+version: '3'
+
+services:
+  client:
+    build:
+      context: ./client
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    ports:
+      - ${PORT_CLIENT:-11000}:3000
+    env_file:
+      - ./client/secrets.env
+
+  server:
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    ports:
+      - ${PORT_SERVER:-11001}:3000
+    env_file:
+      - ./server/secrets.env

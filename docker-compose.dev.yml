@@ -1,0 +1,72 @@
+version: '3'
+
+services:
+  client:
+    build:
+      context: ./client
+      dockerfile: Dockerfile-dev
+    tty: true
+    stdin_open: true
+    restart: unless-stopped
+    environment:
+      - PORT=${PORT_CLIENT:-3000}
+    env_file:
+      - ./client/secrets.dev.env
+    volumes:
+      - ./client:/var/www/app
+      - /var/www/app/.tmp
+    networks:
+      - net
+
+  server:
+    build:
+      context: ./server
+      dockerfile: Dockerfile-dev
+    tty: true
+    stdin_open: true
+    restart: unless-stopped
+    ports:
+      - ${PORT_DEBUG:-9229}:9229
+    environment:
+      - PORT=${PORT_SERVER:-3000}
+    env_file:
+      - ./server/secrets.dev.env
+    volumes:
+      - ./server:/var/www/app
+      - /var/www/app/.tmp
+    networks:
+      - net
+
+  x-dev-nginx:
+    image: nginx:latest
+    ports:
+      - ${PORT:-11000}:11000
+    environment:
+      - PORT=11000
+      - HOST_SERVER=server
+      - PORT_SERVER=${PORT_SERVER:-3000}
+      - HOST_CLIENT=client
+      - PORT_CLIENT=${PORT_CLIENT:-3000}
+    command: /bin/bash /tmp/configure.sh
+    volumes:
+      - ./x-dev-nginx/configure.sh:/tmp/configure.sh
+      - ./x-dev-nginx/templates:/etc/nginx/templates
+      - ./x-dev-nginx/snippets:/etc/nginx/snippets
+    networks:
+      - net
+
+  x-dev-db:
+    image: postgres:11-alpine
+    restart: unless-stopped
+    logging:
+      driver: none
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER:-postgres}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-password}
+    networks:
+      - net
+    volumes:
+      - ./x-dev-db/data:/data/db
+
+networks:
+  net:

@@ -1,0 +1,22 @@
+FROM node:12-alpine
+
+RUN apk add bash
+RUN mkdir -p /var/www/app && \
+    echo -e "alias debug='npm run start:debug'\nalias dev='npm run start:dev'\nalias prod='npm run start:prod'" >> ~/.bashrc
+
+ARG NODE_ENV=development
+ENV NODE_ENV $NODE_ENV
+
+ARG PORT=3000
+ENV PORT $PORT
+
+ARG DEBUG_PORT=9229
+ENV DEBUG_PORT $DEBUG_PORT
+ENV NODE_OPTIONS "--inspect-port=${DEBUG_PORT}"
+
+ENV TSC_VERSION 3.4.3
+RUN npm install -g typescript@$TSC_VERSION tsc-watch @nestjs/cli
+
+WORKDIR /var/www/app
+
+CMD ["./dev-entrypoint.sh"]
